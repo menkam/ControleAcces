@@ -185,5 +185,9 @@
     <string name="title_activity_login">Sign in</string>
     <string name="title_activity_reset_pass">Reset Password</string>
     <string name="title_activity_main2_tuto">Main2ActivityTuto</string>
+    <string name="divertissement">divertissement</string>
+    <string name="sports">sports</string>
+    <string name="technologie">technologie</string>
+    <string name="international">international</string>
 
 </resources>

@@ -1,222 +1,163 @@
 package cm.uds.iutfv.gi.lir.controleacces;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsAyantTerminer;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsEnSalle;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsExclus;
-import cm.uds.iutfv.gi.lir.controleacces.recycler.Etudiants;
-import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
-import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
+import com.github.florent37.materialviewpager.MaterialViewPager;
 
-import static cm.uds.iutfv.gi.lir.controleacces.R.color;
-import static cm.uds.iutfv.gi.lir.controleacces.R.drawable;
-import static cm.uds.iutfv.gi.lir.controleacces.R.id;
-import static cm.uds.iutfv.gi.lir.controleacces.R.layout;
-import static cm.uds.iutfv.gi.lir.controleacces.R.string;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity  {
 
-    private int tabEnCours = -1;
-    public TextView auth_role;
-    public TextView auth_name;
-    public ImageView auth_photo;
+    MaterialViewPager materialViewPager;
+    View headerLogo;
+    ImageView headerLogoContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
+        //4 onglets
+        final int tabCount = 4;
 
-        setContentView(layout.activity_main);
+        //les vues définies dans @layout/header_logo
+        headerLogo = findViewById(R.id.headerLogo);
+        headerLogoContent = (ImageView) findViewById(R.id.headerLogoContent);
 
-        auth_role = (TextView) findViewById(id.auth_role);
-        auth_name = (TextView) findViewById(id.auth_name);
-        auth_photo = (ImageView) findViewById(id.auth_photo);
+        //le MaterialViewPager
+        this.materialViewPager = (MaterialViewPager) findViewById(R.id.materialViewPager);
+        this.materialViewPager.getViewPager().setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
 
-        //auth_role.setText("menkam");
-        //auth_name.setText("francis");
-        //auth_photo.setText(Session.getAuth_role());
-
-
-        Toolbar toolbar = (Toolbar) findViewById(id.toolbar);
-        setSupportActionBar(toolbar);
-
-        TabLayout tabLayout = (TabLayout) findViewById(id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("En Salle"));
-        tabLayout.addTab(tabLayout.newTab().setText("Terminer"));
-        tabLayout.addTab(tabLayout.newTab().setText("Exclus"));
-        tabLayout.addTab(tabLayout.newTab().setText("Liste"));
-        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-
-        final ViewPager viewPager = (ViewPager) findViewById(id.pager);
-        final PagerAdapter adapter = new PagerAdapter
-                (getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
-
-
-
-        Session.setTabEnCours(4);
-        Session.movies4 = Etudiants.getListe(Session.getRoute_get_listeEtud());
-
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-
-            @SuppressLint("ResourceAsColor")
             @Override
-            public void onTabSelected(final TabLayout.Tab tab) {
+            public Fragment getItem(int position) {
+                //je créé pour chaque onglet un RecyclerViewFragment
+                return RecyclerViewFragment.newInstance();
+            }
 
-                viewPager.setCurrentItem(tab.getPosition());
+            @Override
+            public int getCount() {
+                return tabCount;
+            }
 
-                FloatingActionButton fab = (FloatingActionButton) findViewById(id.fab);
-                fab.setVisibility(View.VISIBLE);
-                if(tab.getPosition() == 0){
-                    fab.setBackgroundResource(color.colorPrimary);
-                    fab.setImageResource(drawable.ic_add_user);
-
+            //le titre à afficher pour chaque page
+            @Override
+            public CharSequence getPageTitle(int position) {
+                switch (position) {
+                    case 0:
+                        return getResources().getString(R.string.divertissement);
+                    case 1:
+                        return getResources().getString(R.string.sports);
+                    case 2:
+                        return getResources().getString(R.string.technologie);
+                    case 3:
+                        return getResources().getString(R.string.international);
+                    default:
+                        return "Page " + position;
                 }
-                if(tab.getPosition() == 1){
-                    fab.setBackgroundColor(color.colorPrimaryDark);
-                    fab.setImageResource(drawable.ic_user_finish);
-                }
-                if(tab.getPosition() == 2) {
-                    fab.setBackgroundResource(color.colorBtnRemove);
-                    fab.setImageResource(drawable.ic_remove_user);
-                }
-                //if(tab.getPosition() == 3) fab.setImageResource(R.drawable.ic_list_all_user);
-                if(tab.getPosition() == 3) fab.setVisibility(View.INVISIBLE);
+            }
 
-                fab.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        scanCode();
-                        setTabEnCours(tab.getPosition());
+            int oldItemPosition = -1;
+            @Override
+            public void setPrimaryItem(ViewGroup container, int position, Object object) {
+                super.setPrimaryItem(container, position, object);
+
+                //seulement si la page est différente
+                if (oldItemPosition != position) {
+                    oldItemPosition = position;
+
+                    //définir la nouvelle couleur et les nouvelles images
+                    String imageUrl = null;
+                    int color = Color.BLACK;
+                    Drawable newDrawable = null;
+
+                    switch (position) {
+                        case 0:
+                            imageUrl = "http://www.skyscanner.fr/sites/default/files/image_import/fr/micro.jpg";
+                            color = getResources().getColor(R.color.purple);
+                            newDrawable = getResources().getDrawable(R.drawable.ticket);
+                            break;
+                        case 1:
+                            imageUrl = "http://www.larousse.fr/encyclopedie/data/images/1311904-Balle_de_tennis_et_filet.jpg";
+                            color = getResources().getColor(R.color.orange);
+                            newDrawable = getResources().getDrawable(R.drawable.tennis);
+                            break;
+                        case 2:
+                            imageUrl = "http://soocurious.com/fr/wp-content/uploads/2014/03/8-facettes-de-notre-cerveau-qui-ont-evolue-avec-la-technologie8.jpg";
+                            color = getResources().getColor(R.color.cyan);
+                            newDrawable = getResources().getDrawable(R.drawable.light);
+                            break;
+                        case 3:
+                            imageUrl = "http://graduate.carleton.ca/wp-content/uploads/prog-banner-masters-international-affairs-juris-doctor.jpg";
+                            color = getResources().getColor(R.color.green);
+                            newDrawable = getResources().getDrawable(R.drawable.earth);
+                            break;
                     }
-                });
 
-            }
+                    //puis modifier les images/couleurs
+                    int fadeDuration = 400;
+                    materialViewPager.setColor(color, fadeDuration);
+                    materialViewPager.setImageUrl(imageUrl, fadeDuration);
+                    toggleLogo(newDrawable,color,fadeDuration);
 
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
+                }
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, string.navigation_drawer_open, string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        //permet au viewPager de garder 4 pages en mémoire (à ne pas utiliser sur plus de 4 pages !)
+        this.materialViewPager.getViewPager().setOffscreenPageLimit(tabCount);
+        //relie les tabs au viewpager
+        this.materialViewPager.getPagerTitleStrip().setViewPager(this.materialViewPager.getViewPager());
     }
 
+    private void toggleLogo(final Drawable newLogo, final int newColor, int duration){
 
+        //animation de disparition
+        final AnimatorSet animatorSetDisappear = new AnimatorSet();
+        animatorSetDisappear.setDuration(duration);
+        animatorSetDisappear.playTogether(
+                ObjectAnimator.ofFloat(headerLogo, "scaleX", 0),
+                ObjectAnimator.ofFloat(headerLogo, "scaleY", 0)
+        );
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
+        //animation d'apparition
+        final AnimatorSet animatorSetAppear = new AnimatorSet();
+        animatorSetAppear.setDuration(duration);
+        animatorSetAppear.playTogether(
+                ObjectAnimator.ofFloat(headerLogo, "scaleX", 1),
+                ObjectAnimator.ofFloat(headerLogo, "scaleY", 1)
+        );
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+        //après la disparition
+        animatorSetDisappear.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+                //modifie la couleur du cercle
+                ((GradientDrawable) headerLogo.getBackground()).setColor(newColor);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+                //modifie l'image contenue dans le cercle
+                headerLogoContent.setImageDrawable(newLogo);
 
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void scanCode() {
-        //scan
-        IntentIntegrator scanIntegrator = new IntentIntegrator(this);
-        scanIntegrator.initiateScan();
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        //retrieve scan result
-        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanningResult != null) {
-            //we have a result
-            String scanContent = scanningResult.getContents();
-            String scanFormat = scanningResult.getFormatName();
-
-            if(scanFormat != null && scanContent!= null){
-                if(getTabEnCours()==0) EtudiantsEnSalle.addStudent(getApplicationContext(), scanFormat, scanContent);
-                if(getTabEnCours()==1) EtudiantsAyantTerminer.addStudent(getApplicationContext(), scanFormat, scanContent);
-                if(getTabEnCours()==2) EtudiantsExclus.addStudent(getApplicationContext(), scanFormat, scanContent);
+                //démarre l'animation d'apparition
+                animatorSetAppear.start();
             }
-            else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
-        }
-        else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
+        });
+
+        //démarre l'animation de disparition
+        animatorSetDisappear.start();
     }
 
-    public int getTabEnCours(){ return tabEnCours; }
-
-    public void setTabEnCours(int tabEnCours) { this.tabEnCours = tabEnCours; }
 }
