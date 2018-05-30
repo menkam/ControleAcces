@@ -1,47 +1,55 @@
 package cm.uds.iutfv.gi.lir.controleacces;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsAyantTerminer;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsEnSalle;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsExclus;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.ListeEtudiants;
+import java.util.List;
+
 import cm.uds.iutfv.gi.lir.controleacces.recycler.Etudiants;
+import cm.uds.iutfv.gi.lir.controleacces.recycler.ItemClickListener;
+import cm.uds.iutfv.gi.lir.controleacces.recycler.MyViewHolder;
 
+/**
+ * Created by florentchampigny on 24/04/15.
+ */
+public class PagerAdapter extends RecyclerView.Adapter<MyViewHolder> {
 
-public class PagerAdapter extends FragmentStatePagerAdapter {
-    int mNumOfTabs;
+    List<Etudiants> etudiants;
 
-    public PagerAdapter(FragmentManager fm, int NumOfTabs) {
-        super(fm);
-        this.mNumOfTabs = NumOfTabs;
+    public PagerAdapter(List<Etudiants> etudiants) {
+        this.etudiants = etudiants;
     }
 
     @Override
-    public Fragment getItem(int position) {
-
-        switch (position) {
-            case 0:
-                EtudiantsEnSalle tab1 = new EtudiantsEnSalle();
-                return tab1;
-            case 1:
-                EtudiantsAyantTerminer tab2 = new EtudiantsAyantTerminer();
-                return tab2;
-            case 2:
-                EtudiantsExclus tab3 = new EtudiantsExclus();
-                return tab3;
-            case 3:
-                ListeEtudiants tab4 = new ListeEtudiants();
-                return tab4;
-            default:
-                return null;
-        }
+    public int getItemCount() {
+        return etudiants.size();
     }
 
     @Override
-    public int getCount() {
-        return mNumOfTabs;
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.list_item_card, parent, false);
+        return new MyViewHolder(view) {
+        };
     }
+
+    @Override
+    public void onBindViewHolder(MyViewHolder holder, int position) {
+
+        holder.nameTxt.setText(etudiants.get(position).getName());
+        holder.descriptionTxt.setText(etudiants.get(position).getDescription());
+        holder.avatar.setImageBitmap(etudiants.get(position).getAvatar());
+
+        //LISTENER
+        holder.setItemClickListener(new ItemClickListener() {
+            @Override
+            public void onItemClick(View v, int pos) {
+
+                //Toast.makeText(c, etudiants.get(pos).getRegime(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

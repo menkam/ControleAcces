@@ -12,10 +12,10 @@ import cm.uds.iutfv.gi.lir.controleacces.R;
  */
 public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-    ImageView avatar;
-    TextView nameTxt;
-    TextView descriptionTxt;
-    ItemClickListener itemClickListener;
+    public ImageView avatar;
+    public TextView nameTxt;
+    public TextView descriptionTxt;
+    public ItemClickListener itemClickListener;
 
     public MyViewHolder(View itemView) {
         super(itemView);

@@ -13,12 +13,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -27,10 +22,7 @@ import android.widget.Toast;
 
 import com.github.florent37.materialviewpager.MaterialViewPager;
 
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsAyantTerminer;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsEnSalle;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsExclus;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.ListeEtudiants;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerViewFragment;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
 
@@ -59,12 +51,8 @@ public class MainActivity extends AppCompatActivity  {
         //auth_photo.setText(Session.getAuth_role());
 
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-
-
-
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);*/
 
         //4 onglets
         final int tabCount = 4;
@@ -77,42 +65,10 @@ public class MainActivity extends AppCompatActivity  {
         //le MaterialViewPager
         this.materialViewPager = (MaterialViewPager) findViewById(R.id.materialViewPager);
         this.materialViewPager.getViewPager().setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
-            /*@Override
-            public Fragment getItem(int position) {
-                switch (position){
-                    case 0:
-                        return RecyclerViewFragment.newInstance();
-                    case 1:
-                        return RecyclerViewFragment.newInstance();
-                    case 2:
-                        return RecyclerViewFragment.newInstance();
-                    case 3:
-                        return RecyclerViewFragment.newInstance();
-                    default:
-                        return null;
-                }
-            }*/
             @Override
             public Fragment getItem(int position) {
-
-                switch (position) {
-                    case 0:
-                        EtudiantsEnSalle tab1 = new EtudiantsEnSalle();
-                        return tab1;
-                    case 1:
-                        EtudiantsAyantTerminer tab2 = new EtudiantsAyantTerminer();
-                        return tab2;
-                    case 2:
-                        EtudiantsExclus tab3 = new EtudiantsExclus();
-                        return tab3;
-                    case 3:
-                        ListeEtudiants tab4 = new ListeEtudiants();
-                        return tab4;
-                    default:
-                        return null;
-                }
+                return RecyclerViewFragment.newInstance(position);
             }
-
 
             @Override
             public int getCount() {
@@ -135,7 +91,6 @@ public class MainActivity extends AppCompatActivity  {
                         return "Page " + position;
                 }
             }
-
 
             int oldItemPosition = -1;
             @SuppressLint("ResourceAsColor")
@@ -213,6 +168,12 @@ public class MainActivity extends AppCompatActivity  {
         this.materialViewPager.getPagerTitleStrip().setViewPager(this.materialViewPager.getViewPager());
     }
 
+    /**
+     * animation
+     * @param newLogo
+     * @param newColor
+     * @param duration
+     */
     private void toggleLogo(final Drawable newLogo, final int newColor, int duration){
 
         //animation de disparition
@@ -276,6 +237,7 @@ public class MainActivity extends AppCompatActivity  {
         else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
     }
 
+    /*
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -331,5 +293,5 @@ public class MainActivity extends AppCompatActivity  {
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
+*/
 }

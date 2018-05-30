@@ -1,5 +1,6 @@
 package cm.uds.iutfv.gi.lir.controleacces.fragments;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -13,6 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.github.florent37.materialviewpager.MaterialViewPagerHelper;
+import com.github.florent37.materialviewpager.adapter.RecyclerViewMaterialAdapter;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -28,43 +32,81 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import cm.uds.iutfv.gi.lir.controleacces.PagerAdapter;
 import cm.uds.iutfv.gi.lir.controleacces.R;
 import cm.uds.iutfv.gi.lir.controleacces.Session;
 import cm.uds.iutfv.gi.lir.controleacces.recycler.Etudiants;
-import cm.uds.iutfv.gi.lir.controleacces.recycler.MyRecyclerAdapter;
 
-public class ListeEtudiants extends Fragment{
+/**
+ * Created by florentchampigny on 24/04/15.
+ */
+@SuppressLint("ValidFragment")
+public class RecyclerViewFragment extends Fragment {
 
-    @Nullable
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private int tab = -1;
+
+    public RecyclerViewFragment(int tab) {
+        this.tab = tab;
+    }
+
+    public static RecyclerViewFragment newInstance(int tab) {
+        return new RecyclerViewFragment(tab);
+    }
+
+
     @Override
-    public   View  onCreateView (LayoutInflater  inflater ,   ViewGroup  container ,   Bundle  savedInstanceState )   {
-        //return   inflater . inflate (R.layout.fragment_tab_fragment3,   container ,   false ) ;
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_liste_etudiants, null);
-
-        //ArrayList<Movie> liste = getList();
-
-        //RECYCLERVIEW
-        RecyclerView rv = (RecyclerView) v.findViewById(R.id.mRecyclerListeEtudiants);
-        rv.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-        rv.setAdapter(new MyRecyclerAdapter(this.getActivity(), getList()));
-
-        return v;
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_recyclerview, container, false);
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 
-    /**
-     * SET TITLE FOR FRAGMENT
-     * @return
-     */
-    public String toString(){
-        return "Liste Des Etudiants";
+        //permet un affichage sous forme liste verticale
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+
+        //penser à passer notre Adapter (ici : TestRecyclerViewAdapter) à un RecyclerViewMaterialAdapter
+        switch (this.tab){
+            case 0:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getObect()));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+            case 1:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getObect()));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+            case 2:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getObect()));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+            case 3:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList()));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+        }
+
     }
 
-
-    /**
-     * OBTENIR LA LISTE DE  TOUS LES ETUDIANTS
-     */
+    private ArrayList<Etudiants> getObect() {
+        ArrayList<Etudiants> mContentItems = new ArrayList<>();
+        for (int i = 0; i < 10; ++i)
+            mContentItems.add(new Etudiants());
+        return mContentItems;
+    }
     public ArrayList<Etudiants> getList(){
 
         try
@@ -136,9 +178,17 @@ public class ListeEtudiants extends Fragment{
         } catch (Exception e) {
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
-        return Session.movies4;
+        //return Session.movies4;
         //return personnes;
+        ArrayList<Etudiants> mContentItems = new ArrayList<>();
+        for (int i = 0; i < 100; ++i){
+            Etudiants etudiant = new Etudiants();
+            etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
+            if((i+1)%3==1) etudiant.setDescription("Regulier");
+            else etudiant.setDescription("Creditaire");
+            mContentItems.add(etudiant);
+        }
+
+        return mContentItems;
     }
-
-
 }
