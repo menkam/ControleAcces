@@ -16,15 +16,21 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.florent37.materialviewpager.MaterialViewPager;
 
+import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsAyantTerminer;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsEnSalle;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.EtudiantsExclus;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.ListeEtudiants;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
 
@@ -34,11 +40,31 @@ public class MainActivity extends AppCompatActivity  {
     MaterialViewPager materialViewPager;
     View headerLogo;
     ImageView headerLogoContent;
+    public TextView auth_role;
+    public TextView auth_name;
+    public ImageView auth_photo;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main0);
+
+        auth_role = (TextView) findViewById(R.id.auth_role);
+        auth_name = (TextView) findViewById(R.id.auth_name);
+        auth_photo = (ImageView) findViewById(R.id.auth_photo);
+
+        //auth_role.setText("menkam");
+        //auth_name.setText("francis");
+        //auth_photo.setText(Session.getAuth_role());
+
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+
+
+
 
         //4 onglets
         final int tabCount = 4;
@@ -47,11 +73,11 @@ public class MainActivity extends AppCompatActivity  {
         headerLogo = findViewById(R.id.headerLogo);
         headerLogoContent = (ImageView) findViewById(R.id.headerLogoContent);
 
+
         //le MaterialViewPager
         this.materialViewPager = (MaterialViewPager) findViewById(R.id.materialViewPager);
         this.materialViewPager.getViewPager().setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
-
-            @Override
+            /*@Override
             public Fragment getItem(int position) {
                 switch (position){
                     case 0:
@@ -62,6 +88,26 @@ public class MainActivity extends AppCompatActivity  {
                         return RecyclerViewFragment.newInstance();
                     case 3:
                         return RecyclerViewFragment.newInstance();
+                    default:
+                        return null;
+                }
+            }*/
+            @Override
+            public Fragment getItem(int position) {
+
+                switch (position) {
+                    case 0:
+                        EtudiantsEnSalle tab1 = new EtudiantsEnSalle();
+                        return tab1;
+                    case 1:
+                        EtudiantsAyantTerminer tab2 = new EtudiantsAyantTerminer();
+                        return tab2;
+                    case 2:
+                        EtudiantsExclus tab3 = new EtudiantsExclus();
+                        return tab3;
+                    case 3:
+                        ListeEtudiants tab4 = new ListeEtudiants();
+                        return tab4;
                     default:
                         return null;
                 }
@@ -262,7 +308,7 @@ public class MainActivity extends AppCompatActivity  {
         return super.onOptionsItemSelected(item);
     }
 
-    
+
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
