@@ -41,18 +41,18 @@ import cm.uds.iutfv.gi.lir.controleacces.recycler.Etudiants;
  * Created by florentchampigny on 24/04/15.
  */
 @SuppressLint("ValidFragment")
-public class RecyclerViewFragment extends Fragment {
+public class RecyclerEtudiantEnSalleFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private int tab = -1;
+    private int tab = 0;
 
-    public RecyclerViewFragment(int tab) {
+    public RecyclerEtudiantEnSalleFragment(int tab) {
         this.tab = tab;
     }
 
-    public static RecyclerViewFragment newInstance(int tab) {
-        return new RecyclerViewFragment(tab);
+    public static RecyclerEtudiantEnSalleFragment newInstance(int tab) {
+        return new RecyclerEtudiantEnSalleFragment(tab);
     }
 
 
@@ -72,41 +72,13 @@ public class RecyclerViewFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
 
         //penser à passer notre Adapter (ici : TestRecyclerViewAdapter) à un RecyclerViewMaterialAdapter
-        switch (this.tab){
-            case 0:
-                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
-                mRecyclerView.setAdapter(mAdapter);
-                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
-                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
-                break;
-            case 1:
-                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
-                mRecyclerView.setAdapter(mAdapter);
-                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
-                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
-                break;
-            case 2:
-                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
-                mRecyclerView.setAdapter(mAdapter);
-                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
-                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
-                break;
-            case 3:
-                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
-                mRecyclerView.setAdapter(mAdapter);
-                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
-                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
-                break;
-        }
+        mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(this.tab)));
+        mRecyclerView.setAdapter(mAdapter);
+        //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+        MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
 
     }
 
-    private ArrayList<Etudiants> getObect() {
-        ArrayList<Etudiants> mContentItems = new ArrayList<>();
-        for (int i = 0; i < 10; ++i)
-            mContentItems.add(new Etudiants());
-        return mContentItems;
-    }
     public ArrayList<Etudiants> getList(int position){
         Session.setTabEnCours(position);
         try
@@ -155,46 +127,9 @@ public class RecyclerViewFragment extends Fragment {
                                     etudiant.setAvatar(bm);
                                     etudiant.setRegime(obj.getString("regime"));
 
-                                    //etudiants.add(etudiant);
-                                    switch (Session.getTabEnCours()){
-                                        case 0:
-                                            Session.movies1.add(etudiant);
-                                            break;
-                                        case 1:
-                                            Session.movies2.add(etudiant);
-                                            break;
-                                        case 2:
-                                            Session.movies3.add(etudiant);
-                                            break;
-                                        case 3:
-                                            Session.movies4.add(etudiant);
-                                            break;
-                                    }
+                                    // On ajoute la personne à la liste
+                                    Session.movies1.add(etudiant);
                                 }
-                                //ArrayList<Etudiants> mContentItems = new ArrayList<>();
-                                /*for (int i = 0; i < 100; ++i){
-                                    Etudiants etudiant = new Etudiants();
-                                    etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
-                                    if((i+1)%3==1) etudiant.setDescription("Regulier");
-                                    else etudiant.setDescription("Creditaire");
-                                    //etudiants.add(etudiant);
-                                    switch (Session.getTabEnCours()){
-                                        case 0:
-                                            Session.movies1.add(etudiant);
-                                            break;
-                                        case 1:
-                                            Session.movies2.add(etudiant);
-                                            break;
-                                        case 2:
-                                            Session.movies3.add(etudiant);
-                                            break;
-                                        case 3:
-                                            Session.movies4.add(etudiant);
-                                            break;
-                                    }
-                                }*/
-                            // On ajoute la personne à la liste
-
 
                             Toast.makeText(getContext(), "Nombre d'etudiant"+array.length(), Toast.LENGTH_LONG).show();
                         }else{
@@ -215,38 +150,6 @@ public class RecyclerViewFragment extends Fragment {
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
-        //return Session.movies4;
-        //return personnes;
-        /*ArrayList<Etudiants> mContentItems = new ArrayList<>();
-        for (int i = 0; i < 100; ++i){
-            Etudiants etudiant = new Etudiants();
-            etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
-            if((i+1)%3==1) etudiant.setDescription("Regulier");
-            else etudiant.setDescription("Creditaire");
-            //mContentItems.add(etudiant);
-
-        }*/
-        switch (Session.getTabEnCours()){
-            case 0:
-                return Session.movies1;
-            case 1:
-                return Session.movies2;
-            case 2:
-                return Session.movies3;
-            case 3:
-                return Session.movies4;
-            default:
-                return null;
-        }
-       /* ArrayList<Etudiants> mContentItems = new ArrayList<>();
-        for (int i = 0; i < 100; ++i){
-            Etudiants etudiant = new Etudiants();
-            etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
-            if((i+1)%3==1) etudiant.setDescription("Regulier");
-            else etudiant.setDescription("Creditaire");
-            mContentItems.add(etudiant);
-        }
-
-        return mContentItems;*/
+        return Session.movies1;
     }
 }

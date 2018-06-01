@@ -22,7 +22,10 @@ import android.widget.Toast;
 
 import com.github.florent37.materialviewpager.MaterialViewPager;
 
-import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerViewFragment;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerEtudiantEnSalleFragment;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerEtudiantTerminerFragment;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerEtudiantTricheurFragment;
+import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerListeEtudiantFragment;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
 
@@ -67,7 +70,18 @@ public class MainActivity extends AppCompatActivity  {
         this.materialViewPager.getViewPager().setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                return RecyclerViewFragment.newInstance(position);
+                switch (position) {
+                    case 0:
+                        return RecyclerEtudiantEnSalleFragment.newInstance(position);
+                    case 1:
+                        return RecyclerEtudiantTerminerFragment.newInstance(position);
+                    case 2:
+                        return RecyclerEtudiantTricheurFragment.newInstance(position);
+                    case 3:
+                        return RecyclerListeEtudiantFragment.newInstance(position);
+                    default:
+                        return null;
+                }
             }
 
             @Override
