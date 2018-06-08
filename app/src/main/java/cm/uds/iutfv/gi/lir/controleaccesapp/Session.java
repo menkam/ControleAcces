@@ -10,5 +10,5 @@ public class Session extends AppCompatActivity {
         super.onCreate(savedInstanceState);
     }
 
-    
+
 }
