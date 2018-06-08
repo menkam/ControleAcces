@@ -1,18 +1,16 @@
 package cm.uds.iutfv.gi.lir.controleacces;
 
-import android.support.v7.app.AppCompatActivity;
 import android.app.Activity;
-import android.os.Bundle;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.widget.ProgressBar;
-
 
 import cm.uds.iutfv.gi.lir.blundell.tut.task.LoadingTask;
 import cm.uds.iutfv.gi.lir.blundell.tut.task.LoadingTask.LoadingTaskFinishedListener;
 import cm.uds.iutfv.gi.lir.controleacces.auth.LoginActivity;
 
-public class SplashActivity extends AppCompatActivity implements LoadingTaskFinishedListener {
+public class SplashActivity extends Activity implements LoadingTaskFinishedListener {
 
     MediaPlayer splashSound;
 

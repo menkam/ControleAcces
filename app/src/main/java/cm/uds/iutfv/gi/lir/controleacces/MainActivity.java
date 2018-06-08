@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,7 @@ import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
 
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
     MaterialViewPager materialViewPager;
     View headerLogo;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity  {
     public TextView auth_role;
     public TextView auth_name;
     public ImageView auth_photo;
-
+    private RecyclerEtudiantEnSalleFragment recyclerEtudiantEnSalleFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity  {
         auth_role = (TextView) findViewById(R.id.auth_role);
         auth_name = (TextView) findViewById(R.id.auth_name);
         auth_photo = (ImageView) findViewById(R.id.auth_photo);
+
+        recyclerEtudiantEnSalleFragment = RecyclerEtudiantEnSalleFragment.newInstance();
 
         //auth_role.setText("menkam");
         //auth_name.setText("francis");
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity  {
             public Fragment getItem(int position) {
                 switch (position) {
                     case 0:
-                        return RecyclerEtudiantEnSalleFragment.newInstance(position);
+                        return recyclerEtudiantEnSalleFragment;
                     case 1:
                         return RecyclerEtudiantTerminerFragment.newInstance(position);
                     case 2:
@@ -180,6 +183,25 @@ public class MainActivity extends AppCompatActivity  {
         this.materialViewPager.getViewPager().setOffscreenPageLimit(tabCount);
         //relie les tabs au viewpager
         this.materialViewPager.getPagerTitleStrip().setViewPager(this.materialViewPager.getViewPager());
+        this.materialViewPager.getViewPager().setOnPageChangeListener(
+                new ViewPager.OnPageChangeListener() {
+                    @Override
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                    }
+
+                    @Override
+                    public void onPageSelected(int position) {
+                        if(position == 0)
+                        recyclerEtudiantEnSalleFragment.showToast("hello world");
+                    }
+
+                    @Override
+                    public void onPageScrollStateChanged(int state) {
+
+                    }
+                }
+        );
     }
 
     /**
@@ -232,6 +254,8 @@ public class MainActivity extends AppCompatActivity  {
         IntentIntegrator scanIntegrator = new IntentIntegrator(this);
         scanIntegrator.initiateScan();
     }
+
+
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         //retrieve scan result

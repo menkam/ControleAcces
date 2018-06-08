@@ -45,7 +45,8 @@ public class Session extends Activity{
     private static String infoScan;
     private static String anneeAcademique = "2017-2018";
 
-    private static String url = "http://192.168.8.103:8000/";
+    //private static String url = "http://192.168.8.103:8000/";
+    private static String url = "http://controle-acces-iutfv.herokuapp.com/";
 
     private static String route_login = getUrl() +"androidLogin?";
     private static String route_reset_login = getUrl() +"androidResetLogin?";
@@ -159,8 +160,9 @@ public class Session extends Activity{
         Session.route_verifierEmail = route_verifierEmail;
     }
 
-    public static String getRoute_get_etutEnSalle() {
-        return route_get_etutEnSalle;
+    public static String getRoute_get_etutEnSalle(int statut) {
+        String route = route_get_etutEnSalle;
+        return route+statut;
     }
 
     public static void setRoute_get_etutEnSalle(String route_get_etutEnSalle) {

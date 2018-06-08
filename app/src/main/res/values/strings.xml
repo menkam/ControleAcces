@@ -193,5 +193,6 @@
     <string name="etudiant_ayant_terminer">etudiants ayant terminer</string>
     <string name="etudiant_exclus">etudiants trichuer</string>
     <string name="list_etudiant">liste des etudiants</string>
+    <string name="title_activity_login2">Sign in</string>
 
 </resources>

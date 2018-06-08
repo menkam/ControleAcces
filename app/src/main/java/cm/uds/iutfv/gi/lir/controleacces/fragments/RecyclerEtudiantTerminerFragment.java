@@ -85,6 +85,7 @@ public class RecyclerEtudiantTerminerFragment extends Fragment {
             mContentItems.add(new Etudiants());
         return mContentItems;
     }
+
     public ArrayList<Etudiants> getList(int position){
         Session.setTabEnCours(position);
         try
@@ -98,8 +99,10 @@ public class RecyclerEtudiantTerminerFragment extends Fragment {
 
                     StringBuffer reponseHTTP = new StringBuffer();
                     HttpClient client = new DefaultHttpClient();
-                    String url = Session.getRoute_get_listeEtud();
-                    HttpGet httpGet = new HttpGet(url);
+                    String url = Session.getRoute_get_etutEnSalle(1);
+                    HttpGet httpGet = new HttpGet(
+                            "http://controle-acces-iutfv.herokuapp.com/androidGetListEtudiant?idActivite=1&statut=1"
+                    );
                     try{
                         HttpResponse response = client.execute(httpGet);
                         StatusLine statusLine = response.getStatusLine();

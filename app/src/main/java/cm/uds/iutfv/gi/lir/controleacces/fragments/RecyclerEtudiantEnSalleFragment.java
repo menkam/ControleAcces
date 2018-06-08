@@ -55,6 +55,10 @@ public class RecyclerEtudiantEnSalleFragment extends Fragment {
         return new RecyclerEtudiantEnSalleFragment(tab);
     }
 
+    // todo retire apres
+    public static RecyclerEtudiantEnSalleFragment newInstance() {
+        return new RecyclerEtudiantEnSalleFragment(0);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -76,7 +80,6 @@ public class RecyclerEtudiantEnSalleFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
         MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
-
     }
 
     public ArrayList<Etudiants> getList(int position){
@@ -92,8 +95,10 @@ public class RecyclerEtudiantEnSalleFragment extends Fragment {
 
                     StringBuffer reponseHTTP = new StringBuffer();
                     HttpClient client = new DefaultHttpClient();
-                    String url = Session.getRoute_get_listeEtud();
-                    HttpGet httpGet = new HttpGet(url);
+                    String url = Session.getRoute_get_etutEnSalle(0);
+                    HttpGet httpGet = new HttpGet(
+                            "http://controle-acces-iutfv.herokuapp.com/androidGetListEtudiant?idActivite=1&statut=0"
+                    );
                     try{
                         HttpResponse response = client.execute(httpGet);
                         StatusLine statusLine = response.getStatusLine();
@@ -151,5 +156,10 @@ public class RecyclerEtudiantEnSalleFragment extends Fragment {
         }
 
         return Session.movies1;
+    }
+
+    public void showToast(String s) {
+        Toast.makeText(getContext(), s, Toast.LENGTH_SHORT).show();
+
     }
 }

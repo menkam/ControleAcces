@@ -98,8 +98,10 @@ public class RecyclerEtudiantTricheurFragment extends Fragment {
 
                     StringBuffer reponseHTTP = new StringBuffer();
                     HttpClient client = new DefaultHttpClient();
-                    String url = Session.getRoute_get_listeEtud();
-                    HttpGet httpGet = new HttpGet(url);
+                    String url = Session.getRoute_get_etutEnSalle(2);
+                    HttpGet httpGet = new HttpGet(
+                            "http://controle-acces-iutfv.herokuapp.com/androidGetListEtudiant?idActivite=1&statut=2"
+                    );
                     try{
                         HttpResponse response = client.execute(httpGet);
                         StatusLine statusLine = response.getStatusLine();
