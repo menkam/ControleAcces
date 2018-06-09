@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/materialViewPager">
+
+    <android.support.v7.widget.CardView
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp"
+    android:layout_marginBottom="@dimen/cardMarginVertical"
+    android:layout_marginLeft="@dimen/cardMarginHorizontal"
+    android:layout_marginRight="@dimen/cardMarginHorizontal"
+    android:layout_marginTop="@dimen/cardMarginVertical"
+    app:cardPreventCornerOverlap="false"
+    app:contentPadding="1dp">
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/listPreferredItemHeight"
+            android:padding="1dp" >
+
+            <ImageView
+                android:id="@+id/photoUser"
+                android:layout_width="50dip"
+                android:layout_height="50dip"
+                android:layout_margin="5dip"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
+                android:contentDescription="TODO"
+                android:src="@mipmap/ic_launcher"/>
+            <TextView
+                android:id="@+id/descriptionUser"
+                android:layout_width="fill_parent"
+                android:layout_height="26dip"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@id/photoUser"
+                android:text="Description"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/infoUser"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/descriptionUser"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_toRightOf="@id/photoUser"
+                android:gravity="center_vertical"
+                android:text="Matricule, Nom et Prénom"
+                android:textSize="16sp" />
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/chk"
+                android:layout_alignParentRight="true"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+</FrameLayout>

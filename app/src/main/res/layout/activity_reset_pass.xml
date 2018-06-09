@@ -69,9 +69,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@color/green"
-                android:text="@string/action_sign_in"
+                android:background="@color/colorPrimaryDark"
+                android:text="@string/action_reset_pass"
                 android:textStyle="bold" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -3,7 +3,9 @@ package cm.uds.iutfv.gi.lir.controleaccesapp.auth;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,11 +30,25 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import cm.uds.iutfv.gi.lir.controleaccesapp.MainActivity;
 import cm.uds.iutfv.gi.lir.controleaccesapp.R;
+import cm.uds.iutfv.gi.lir.controleaccesapp.Session;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -161,21 +177,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        // Check for a valid password and email, if the user entered one.
+
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            if (TextUtils.isEmpty(email)){
+                mEmailView.setError(getString(R.string.error_field_required));
+                focusView = mEmailView;
+            }
+            else {
+                mPasswordView.setError(getString(R.string.error_field_required));
+                focusView = mPasswordView;
+            }
             cancel = true;
         }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        else if (!isEmailValid(email) || !isPasswordValid(password)){
+            if (!isEmailValid(email)) {
+                mEmailView.setError(getString(R.string.error_invalid_email));
+                focusView = mEmailView;
+            }else{
+                mPasswordView.setError(getString(R.string.error_invalid_password));
+                focusView = mPasswordView;
+            }
             cancel = true;
         }
 
@@ -194,13 +216,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return (email.contains("@yahoo.fr") ||
+            email.contains("@yahoo.com") ||
+            email.contains("@yahoo.cm") ||
+            email.contains("@uds.cm") ||
+            email.contains("@gmail.com") ||
+            email.contains("@hotmail.fr")
+        );
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 5;
     }
+
+
 
     /**
      * Shows the progress UI and hides the login form.
@@ -300,6 +330,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private boolean connecter;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -312,8 +343,86 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             try {
                 // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                //Thread.sleep(2000);
+                // Création d'un thread
+                Session.setConnecter(false);
+                Thread t = new Thread()
+                {
+                    public void run()
+                    {
+                        Looper.prepare();
+
+                        StringBuffer reponseHTTP = new StringBuffer();
+                        HttpClient client = new DefaultHttpClient();
+                        String url = Session.getRoute_login() +"email="+mEmail+"&password="+mPassword;
+                        HttpGet httpGet = new HttpGet(url);
+                        try{
+                            HttpResponse response = client.execute(httpGet);
+                            StatusLine statusLine = response.getStatusLine();
+                            int statusCode = statusLine.getStatusCode();
+                            if(statusCode == 200){
+                                HttpEntity entity = response.getEntity();
+                                InputStream content = entity.getContent();
+                                BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                                String line;
+                                while ((line = reader.readLine()) != null){
+                                    reponseHTTP.append(line);
+                                }
+                                JSONObject jsonObject = new JSONObject(reponseHTTP.toString());
+
+                                if(jsonObject.getInt("status") == 0){
+                                    Toast.makeText(getApplicationContext(), "Login / Pass incorrect !!!", Toast.LENGTH_LONG).show();
+                                    onPostExecute(false);
+                                }else{
+
+                                    // si Admin
+                                    if(jsonObject.getInt("status") == 1 || jsonObject.getInt("status") == 2 || jsonObject.getInt("status") == 4){
+                                        Session.setConnecter(true);
+
+                                        String nom = jsonObject.getString("nom");
+                                        String prenom = jsonObject.getString("prenom");
+                                        String sexe = jsonObject.getString("sexe");
+                                        String role = jsonObject.getString("role");
+
+                                        Session.setAuth_id(jsonObject.getInt("id"));
+                                        Session.setIdActivite(jsonObject.getInt("idActivity"));
+                                        Session.setAuth_name(nom+" "+prenom);
+                                        Session.setAuth_role(role);
+
+                                        if(sexe=="M") Toast.makeText(getApplicationContext(), "Bienvenu M. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
+                                        if(sexe=="F") Toast.makeText(getApplicationContext(), "Bienvenu Mme. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
+
+                                        Toast.makeText(getApplicationContext(), "connecter", Toast.LENGTH_LONG).show();
+                                        onPostExecute(true);
+                                    }
+                                    // si Etudiant
+                                    else if(jsonObject.getInt("status") == 3){
+                                        Toast.makeText(getApplicationContext(), "Attention !!! acces limité pour les étudiants", Toast.LENGTH_LONG).show();
+                                        onPostExecute(false);
+                                    }
+                                    // si visiteur
+                                    else if(jsonObject.getInt("status") == 5){
+                                        Toast.makeText(getApplicationContext(), "votre compte n'est pas activivé bien vouloir contacter l'administrateur", Toast.LENGTH_LONG).show();
+                                        onPostExecute(false);
+                                    }
+                                }
+                            }else{
+                                Toast.makeText(getApplicationContext(), "Code = "+statusCode, Toast.LENGTH_LONG).show();
+                                //progressBarConnexion.setVisibility(View.INVISIBLE);
+                            }
+                        }catch(Exception e){
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                            //progressBarConnexion.setVisibility(View.INVISIBLE);
+                        }
+
+                        Looper.loop();
+                    }
+
+                };
+                t.sleep(1000);
+                t.start();
+
+            } catch (Exception e) {
                 return false;
             }
 
@@ -326,7 +435,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             // TODO: register the new account here.
-            return true;
+            return Session.isConnecter();
         }
 
         @Override
@@ -335,10 +444,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                finish();
+                //finish();
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(i);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
+                mEmailView.requestFocus();
             }
         }
 
@@ -348,5 +460,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
     }
-}
 
+}

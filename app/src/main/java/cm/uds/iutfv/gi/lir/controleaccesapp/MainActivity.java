@@ -1,47 +1,267 @@
 package cm.uds.iutfv.gi.lir.controleaccesapp;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import com.github.florent37.materialviewpager.MaterialViewPager;
+
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantEnSalleFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantTerminerFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantTricheurFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerListeEtudiantFragment;
+import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
+import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
+
+
+public class MainActivity extends AppCompatActivity  {
+
+    MaterialViewPager materialViewPager;
+    View headerLogo;
+    ImageView headerLogoContent;
+    public TextView auth_role;
+    public TextView auth_name;
+    public ImageView auth_photo;
+
+    private RecyclerEtudiantEnSalleFragment recyclerEtudiantEnSalleFragment;
+    private RecyclerEtudiantTerminerFragment recyclerEtudiantTerminerFragment;
+    private RecyclerEtudiantTricheurFragment recyclerEtudiantTricheurFragment ;
+    private RecyclerListeEtudiantFragment recyclerListeEtudiantFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        auth_role = (TextView) findViewById(R.id.auth_role);
+        auth_name = (TextView) findViewById(R.id.auth_name);
+        auth_photo = (ImageView) findViewById(R.id.auth_photo);
+
+        recyclerEtudiantEnSalleFragment = RecyclerEtudiantEnSalleFragment.newInstance();
+
+        //auth_role.setText("menkam");
+        //auth_name.setText("francis");
+        //auth_photo.setText(Session.getAuth_role());
+
+
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);*/
+
+        //4 onglets
+        final int tabCount = 4;
+
+        //les vues définies dans @layout/header_logo
+        headerLogo = findViewById(R.id.headerLogo);
+        headerLogoContent = (ImageView) findViewById(R.id.headerLogoContent);
+
+
+        //le MaterialViewPager
+        this.materialViewPager = (MaterialViewPager) findViewById(R.id.materialViewPager);
+        this.materialViewPager.getViewPager().setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public Fragment getItem(int position) {
+                switch (position) {
+                    case 0:
+                        return RecyclerEtudiantEnSalleFragment.newInstance(position);
+                    case 1:
+                        return RecyclerEtudiantTerminerFragment.newInstance(position);
+                    case 2:
+                        return RecyclerEtudiantTricheurFragment.newInstance(position);
+                    case 3:
+                        return RecyclerListeEtudiantFragment.newInstance(position);
+                    default:
+                        return null;
+                }
+            }
+
+            @Override
+            public int getCount() {
+                return tabCount;
+            }
+
+            //le titre à afficher pour chaque page
+            @Override
+            public CharSequence getPageTitle(int position) {
+                switch (position) {
+                    case 0:
+                        return getResources().getString(R.string.etudiant_en_salle);
+                    case 1:
+                        return getResources().getString(R.string.etudiant_ayant_terminer);
+                    case 2:
+                        return getResources().getString(R.string.etudiant_exclus);
+                    case 3:
+                        return getResources().getString(R.string.list_etudiant);
+                    default:
+                        return "Page " + position;
+                }
+            }
+
+            int oldItemPosition = -1;
+            @SuppressLint("ResourceAsColor")
+            @Override
+            public void setPrimaryItem(ViewGroup container, int position, Object object) {
+                super.setPrimaryItem(container, position, object);
+
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+                //seulement si la page est différente
+                if (oldItemPosition != position) {
+                    oldItemPosition = position;
+
+                    //définir la nouvelle couleur et la nouvelle images
+                    Drawable image = null;
+                    int color = Color.BLACK;
+                    Drawable newDrawable = null;
+
+                    switch (position) {
+                        case 0:
+                            //recyclerEtudiantEnSalleFragment.showToast(getApplicationContext(), "en salle");
+                            recyclerEtudiantEnSalleFragment.refreshList(getApplicationContext());
+                            image = getDrawable(R.drawable.img_en_salle);
+                            color = getResources().getColor(R.color.purple);
+                            newDrawable = getResources().getDrawable(R.drawable.ticket);
+                            fab.setImageResource(R.color.colorPrimary);
+                            fab.setImageResource(R.drawable.ic_add_user);
+                            fab.setVisibility(View.VISIBLE);
+                            break;
+                        case 1:
+                            recyclerEtudiantTerminerFragment.refreshList(getApplicationContext());
+                            image = getDrawable(R.drawable.img_terminer);
+                            color = getResources().getColor(R.color.green);
+                            newDrawable = getResources().getDrawable(R.drawable.tennis);
+                            fab.setBackgroundColor(R.color.green);
+                            fab.setImageResource(R.drawable.ic_user_finish);
+                            fab.setVisibility(View.VISIBLE);
+                            break;
+                        case 2:
+                            recyclerEtudiantTricheurFragment.refreshList(getApplicationContext());
+                            image = getDrawable(R.drawable.img_tricheur);
+                            color = getResources().getColor(R.color.orange);
+                            newDrawable = getResources().getDrawable(R.drawable.light);
+                            fab.setBackgroundResource(R.color.colorBtnRemove);
+                            fab.setImageResource(R.drawable.ic_remove_user);
+                            fab.setVisibility(View.VISIBLE);
+                            break;
+                        case 3:
+                            recyclerListeEtudiantFragment.refreshList(getApplicationContext());
+                            image = getDrawable(R.drawable.img_liste);
+                            color = getResources().getColor(R.color.cyan);
+                            newDrawable = getResources().getDrawable(R.drawable.earth);
+                            fab.setVisibility(View.INVISIBLE);
+                            break;
+                    }
+
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            scanCode();
+                            //setTabEnCours(tab.getPosition());
+                        }
+                    });
+
+                    //puis modifier les images/couleurs
+                    int fadeDuration = 200;
+                    materialViewPager.setColor(color, fadeDuration);
+                    //materialViewPager.setImageUrl(imageUrl, fadeDuration);
+                    materialViewPager.setImageDrawable(image, fadeDuration);
+                    toggleLogo(newDrawable,color,fadeDuration);
+
+                }
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        //permet au viewPager de garder 4 pages en mémoire (à ne pas utiliser sur plus de 4 pages !)
+        this.materialViewPager.getViewPager().setOffscreenPageLimit(tabCount);
+        //relie les tabs au viewpager
+        this.materialViewPager.getPagerTitleStrip().setViewPager(this.materialViewPager.getViewPager());
     }
 
+    /**
+     * animation
+     * @param newLogo
+     * @param newColor
+     * @param duration
+     */
+    private void toggleLogo(final Drawable newLogo, final int newColor, int duration){
+
+        //animation de disparition
+        final AnimatorSet animatorSetDisappear = new AnimatorSet();
+        animatorSetDisappear.setDuration(duration);
+        animatorSetDisappear.playTogether(
+                ObjectAnimator.ofFloat(headerLogo, "scaleX", 0),
+                ObjectAnimator.ofFloat(headerLogo, "scaleY", 0)
+        );
+
+        //animation d'apparition
+        final AnimatorSet animatorSetAppear = new AnimatorSet();
+        animatorSetAppear.setDuration(duration);
+        animatorSetAppear.playTogether(
+                ObjectAnimator.ofFloat(headerLogo, "scaleX", 1),
+                ObjectAnimator.ofFloat(headerLogo, "scaleY", 1)
+        );
+
+        //après la disparition
+        animatorSetDisappear.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                //modifie la couleur du cercle
+                ((GradientDrawable) headerLogo.getBackground()).setColor(newColor);
+
+                //modifie l'image contenue dans le cercle
+                headerLogoContent.setImageDrawable(newLogo);
+
+                //démarre l'animation d'apparition
+                animatorSetAppear.start();
+            }
+        });
+
+        //démarre l'animation de disparition
+        animatorSetDisappear.start();
+    }
+
+    private void scanCode() {
+        //scan
+        IntentIntegrator scanIntegrator = new IntentIntegrator(this);
+        scanIntegrator.initiateScan();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        //retrieve scan result
+        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanningResult != null) {
+            //we have a result
+            String scanContent = scanningResult.getContents();
+            String scanFormat = scanningResult.getFormatName();
+
+            if(scanFormat != null && scanContent!= null){
+                //if(getTabEnCours()==0) EtudiantsEnSalle.addStudent(getApplicationContext(), scanFormat, scanContent);
+                //if(getTabEnCours()==1) EtudiantsAyantTerminer.addStudent(getApplicationContext(), scanFormat, scanContent);
+                //if(getTabEnCours()==2) EtudiantsExclus.addStudent(getApplicationContext(), scanFormat, scanContent);
+            }
+            else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
+        }
+        else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
+    }
+
+    /*
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -74,8 +294,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
+
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
@@ -98,4 +317,5 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+*/
 }

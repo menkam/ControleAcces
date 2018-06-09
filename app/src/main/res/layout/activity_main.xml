@@ -8,18 +8,44 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <include
-        layout="@layout/app_bar_main"
+    <com.github.florent37.materialviewpager.MaterialViewPager
+        android:id="@+id/materialViewPager"
+        app:viewpager_color="@color/colorPrimary"
+        app:viewpager_enableToolbarElevation="true"
+        app:viewpager_headerAlpha="0.6"
+        app:viewpager_headerHeight="200dp"
+        app:viewpager_hideLogoWithFade="false"
+        app:viewpager_hideToolbarAndTitle="false"
+        app:viewpager_logo="@layout/header_logo"
+        app:viewpager_pagerTitleStrip="@layout/material_view_pager_pagertitlestrip_newstand"
+        app:viewpager_logoMarginTop="80dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <android.support.design.widget.NavigationView
+        <include layout="@layout/fragment_content_main" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            app:backgroundTint="@color/colorPrimary"
+            app:rippleColor="@color/red"
+            app:srcCompat="@drawable/ic_add_user">
+
+        </android.support.design.widget.FloatingActionButton>
+
+    </com.github.florent37.materialviewpager.MaterialViewPager>
+
+
+    <!--android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
+        app:menu="@menu/activity_main_drawer" /-->
 
 </android.support.v4.widget.DrawerLayout>
