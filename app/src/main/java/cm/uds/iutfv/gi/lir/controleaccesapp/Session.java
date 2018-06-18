@@ -59,6 +59,7 @@ public class Session extends AppCompatActivity {
     private static String anneeAcademique = "2017-2018";
 
     private static String url = "http://controle-acces-iutfv.herokuapp.com/";
+    //private static String url = "http://192.168.8.100/ControleAccesExamens/public/";
 
     private static String route_login = getUrl() +"androidLogin?";
     private static String route_reset_login = getUrl() +"androidResetLogin?";

@@ -120,7 +120,8 @@ public class RecyclerEtudiantTerminerFragment extends Fragment {
                             // On récupère le tableau d'objets qui nous concernent
                             JSONArray array = new JSONArray(jsonObject.getString("etudiants"));
                             ArrayList<Etudiants> etudiants = new ArrayList<Etudiants>();
-                            if(array.length()>0)
+                            if(array.length()>0){
+                                Session.movies2.clear();
                                 for (int i = 0; i < array.length(); i++) {
                                     // On récupère un objet JSON du tableau
                                     JSONObject obj = new JSONObject(array.getString(i));
@@ -136,27 +137,30 @@ public class RecyclerEtudiantTerminerFragment extends Fragment {
                                     etudiant.setRegime(obj.getString("regime"));
 
                                     // On ajoute la personne à la liste
-                                    Session.movies2.clear();
                                     Session.movies2.add(etudiant);
                                 }
 
-                            // Toast.makeText(getContext(), "Nombre d'etudiant"+array.length(), Toast.LENGTH_LONG).show();
+                                //Toast.makeText(context, "Nombre d'etudiant : " + array.length(), Toast.LENGTH_LONG).show();
+                            }else{
+                                Toast.makeText(context, "aucun étudiant n'a terminer", Toast.LENGTH_LONG).show();
+                            }
+
                         }else{
-                            // Toast.makeText(getContext(), "Code = "+statusCode, Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Code = "+statusCode, Toast.LENGTH_LONG).show();
                             //progressBarConnexion.setVisibility(View.INVISIBLE);
                         }
                     }catch(Exception e){
-                        //Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
                         //progressBarConnexion.setVisibility(View.INVISIBLE);
                     }
                     Looper.loop();
                 }
             };
-            t.sleep(100);
+            //t.sleep(100);
             t.start();
 
         } catch (Exception e) {
-            //Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
