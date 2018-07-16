@@ -7,35 +7,37 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.util.Log;
+import android.widget.TextView;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.ArrayList;
 
 import cm.uds.iutfv.gi.lir.controleaccesapp.recycler.Etudiants;
 
 public class Session extends AppCompatActivity {
 
+    private TextView message,matricule,nom,prenom,matiere,regime,numero,nbrPerso;
+
+
     public static ArrayList<Etudiants> movies1 = new ArrayList<>();
     public static ArrayList<Etudiants> movies2 = new ArrayList<>();
     public static ArrayList<Etudiants> movies3 = new ArrayList<>();
     public static ArrayList<Etudiants> movies4 = new ArrayList<>();
     public static int tabEnCours;
-    public static Context context;
+    private static Context context;
+    public static int statut0 = 99;
 
-    public static Context getContext() {
-        return context;
-    }
-
-    public static void setContext(Context context) {
-        Session.context = context;
-    }
-
-    public static int getTabEnCours() {
-        return tabEnCours;
-    }
-
-    public static void setTabEnCours(int tabEnCours) {
-        Session.tabEnCours = tabEnCours;
-    }
+    private static JSONObject responseHttp;
 
     private static int auth_id;
     private static String auth_sexe;
@@ -47,6 +49,55 @@ public class Session extends AppCompatActivity {
     private static boolean connecter = false;
     private static boolean emailExist = false;
 
+    private static String infoScan;
+    private static String anneeAcademique = "2017-2018";
+
+    //private static String url = "http://controle-acces-iutfv.herokuapp.com/";
+    //private static String url = "http://192.168.8.101/ControleAccesExamens/public/";
+    private static String url = "http://192.168.0.1:8000/";
+
+    private static String route_login = getUrl() +"androidLogin?";
+    private static String route_reset_login = getUrl() +"androidResetLogin?";
+    private static String route_register = getUrl() +"androidRegister?";
+    private static String route_verifierEmail = getUrl() +"androidVerifierEmail?email=";
+
+    private static String route_get_etutEnSalle = getUrl() +"androidGetListEtudiant?idActivite="+getIdActivite()+"&statut=";
+    private static String route_get_listeEtud = getUrl() +"androidGetListAllEtudiant?idActivite="+getIdActivite();
+    private static String route_add_etutEnSalle = getUrl() +"androidAddStudent?";
+    private static String route_add_etutAyantTerminer = getUrl() +"androidStudentFinish?";
+    private static String route_add_etutExclus = getUrl() +"androidStudentExclus?";
+    private  static String route_gestion_activite;
+    private static String route_sentMsg = getUrl() +"http://controle-acces-iutfv.herokuapp.com/";
+    private static String route_getInfoUser = getUrl() +"http://controle-acces-iutfv.herokuapp.com/";
+    private static int idActivite = 1;
+    private static int numTab;
+
+    public static String getRoute_gestion_activite() {
+        return route_gestion_activite;
+    }
+
+    public static void setRoute_gestion_activite(String codeBare) {
+        route_gestion_activite = null;
+        route_gestion_activite = getUrl()+"androidScanCodeBare?codeBare="+codeBare+"&numTab="+Session.getNumTab()+"&idUser="+Session.getAuth_id();
+    }
+
+    public static Context getContext() {
+        return context;
+    }
+
+    public static void setContext(Context c) {
+        context = null;
+        context = c;
+    }
+
+    public static int getTabEnCours() {
+        return tabEnCours;
+    }
+
+    public static void setTabEnCours(int tabEnCours) {
+        Session.tabEnCours = tabEnCours;
+    }
+
     public static boolean isEmailExist() {
         return emailExist;
     }
@@ -55,28 +106,20 @@ public class Session extends AppCompatActivity {
         Session.emailExist = emailExist;
     }
 
-    private static String infoScan;
-    private static String anneeAcademique = "2017-2018";
+    public static JSONObject getResponseHttp() {return responseHttp;}
 
-    private static String url = "http://controle-acces-iutfv.herokuapp.com/";
-    //private static String url = "http://192.168.8.100/ControleAccesExamens/public/";
+    public static void setResponseHttp(JSONObject response) {
+        //responseHttp = null;
+        responseHttp = response;
+    }
 
-    private static String route_login = getUrl() +"androidLogin?";
-    private static String route_reset_login = getUrl() +"androidResetLogin?";
-    private static String route_register = getUrl() +"androidRegister?";
-    private static String route_verifierEmail = getUrl() +"androidVerifierEmail?email=";
+    public static int getNumTab() {
+        return numTab;
+    }
 
-    private static String route_get_etutEnSalle = getUrl() +"androidGetListEtudiant?idActivite="+getIdActivite()+"&statut=";
-
-    private static String route_get_listeEtud = getUrl() +"androidGetListAllEtudiant?idActivite="+getIdActivite();
-
-    private static String route_add_etutEnSalle = getUrl() +"androidAddStudent?";
-    private static String route_add_etutAyantTerminer = getUrl() +"androidStudentFinish?";
-    private static String route_add_etutExclus = getUrl() +"androidStudentExclus?";
-
-    private static String route_sentMsg = getUrl() +"http://controle-acces-iutfv.herokuapp.com/";
-    private static String route_getInfoUser = getUrl() +"http://controle-acces-iutfv.herokuapp.com/";
-    private static int idActivite = 1;
+    public static void setNumTab(int numTab) {
+        Session.numTab = numTab;
+    }
 
     public static String getAuth_name() {
         return auth_name;
@@ -283,6 +326,31 @@ public class Session extends AppCompatActivity {
         matrix.postScale(scaleWidth, scaleHeight);
          return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
 
+    }
+
+    public static String getHttpResponse(URI uri2) {
+        StringBuilder response = new StringBuilder();
+        try {
+            HttpGet get = new HttpGet();
+            get.setURI(uri2);
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpResponse httpResponse = httpClient.execute(get);
+            if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                Log.d("[GET REQUEST]", "HTTP Get succeeded");
+
+                HttpEntity messageEntity = httpResponse.getEntity();
+                InputStream is = messageEntity.getContent();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("[GET REQUEST]", e.getMessage());
+        }
+        Log.d("[GET REQUEST]", "Done with HTTP getting");
+        return response.toString();
     }
 
     @Override

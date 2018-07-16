@@ -38,9 +38,11 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -326,7 +328,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String mEmail;
         private final String mPassword;
@@ -336,114 +338,84 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmail = email;
             mPassword = password;
         }
-
+        ///String url = Session.getRoute_login() +"email="+mEmail+"&password="+mPassword;********
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
+        protected JSONObject doInBackground(Void... params) {
+            JSONObject jsonObject = null;
+            String url = Session.getRoute_login() +"email="+mEmail+"&password="+mPassword;
+            StringBuffer reponseHTTP = new StringBuffer();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(url);
+            HttpResponse response = null;
             try {
-                // Simulate network access.
-                //Thread.sleep(2000);
-                // Création d'un thread
-                Session.setConnecter(false);
-                Thread t = new Thread()
-                {
-                    public void run()
-                    {
-                        Looper.prepare();
+                response = client.execute(httpGet);
+                StatusLine statusLine = response.getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if(statusCode == 200) {
+                    HttpEntity entity = response.getEntity();
+                    InputStream content = entity.getContent();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                    String line;
+                    while ((line = reader.readLine()) != null) { reponseHTTP.append(line); }
+                    jsonObject = new JSONObject(reponseHTTP.toString());
+                }else{ Toast.makeText(getApplicationContext(), "Code = "+statusCode, Toast.LENGTH_LONG).show(); }
+            } catch (IOException e) { Toast.makeText(getApplicationContext(), "erreur de ccreation du clientHttp : "+e.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (JSONException e) { Toast.makeText(getApplicationContext(), "erreur de conversion JSON : "+e.getMessage(), Toast.LENGTH_LONG).show();}
 
-                        StringBuffer reponseHTTP = new StringBuffer();
-                        HttpClient client = new DefaultHttpClient();
-                        String url = Session.getRoute_login() +"email="+mEmail+"&password="+mPassword;
-                        HttpGet httpGet = new HttpGet(url);
-                        try{
-                            HttpResponse response = client.execute(httpGet);
-                            StatusLine statusLine = response.getStatusLine();
-                            int statusCode = statusLine.getStatusCode();
-                            if(statusCode == 200){
-                                HttpEntity entity = response.getEntity();
-                                InputStream content = entity.getContent();
-                                BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-                                String line;
-                                while ((line = reader.readLine()) != null){
-                                    reponseHTTP.append(line);
-                                }
-                                JSONObject jsonObject = new JSONObject(reponseHTTP.toString());
-
-                                if(jsonObject.getInt("status") == 0){
-                                    Toast.makeText(getApplicationContext(), "Login / Pass incorrect !!!", Toast.LENGTH_LONG).show();
-                                    onPostExecute(false);
-                                }else{
-
-                                    // si Admin
-                                    if(jsonObject.getInt("status") == 1 || jsonObject.getInt("status") == 2 || jsonObject.getInt("status") == 4){
-                                        Session.setConnecter(true);
-
-                                        String nom = jsonObject.getString("nom");
-                                        String prenom = jsonObject.getString("prenom");
-                                        String sexe = jsonObject.getString("sexe");
-                                        String role = jsonObject.getString("role");
-
-                                        Session.setAuth_id(jsonObject.getInt("id"));
-                                        Session.setIdActivite(jsonObject.getInt("idActivity"));
-                                        Session.setAuth_name(nom+" "+prenom);
-                                        Session.setAuth_role(role);
-
-                                        if(sexe=="M") Toast.makeText(getApplicationContext(), "Bienvenu M. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
-                                        if(sexe=="F") Toast.makeText(getApplicationContext(), "Bienvenu Mme. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
-
-                                        Toast.makeText(getApplicationContext(), "connecter", Toast.LENGTH_LONG).show();
-                                        onPostExecute(true);
-                                    }
-                                    // si Etudiant
-                                    else if(jsonObject.getInt("status") == 3){
-                                        Toast.makeText(getApplicationContext(), "Attention !!! acces limité pour les étudiants", Toast.LENGTH_LONG).show();
-                                        onPostExecute(false);
-                                    }
-                                    // si visiteur
-                                    else if(jsonObject.getInt("status") == 5){
-                                        Toast.makeText(getApplicationContext(), "votre compte n'est pas activivé bien vouloir contacter l'administrateur", Toast.LENGTH_LONG).show();
-                                        onPostExecute(false);
-                                    }
-                                }
-                            }else{
-                                Toast.makeText(getApplicationContext(), "Code = "+statusCode, Toast.LENGTH_LONG).show();
-                                //progressBarConnexion.setVisibility(View.INVISIBLE);
-                            }
-                        }catch(Exception e){
-                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                            //progressBarConnexion.setVisibility(View.INVISIBLE);
-                        }
-
-                        Looper.loop();
-                    }
-
-                };
-                t.sleep(1000);
-                t.start();
-
-            } catch (Exception e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return Session.isConnecter();
+            return jsonObject;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(JSONObject jsonObject) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
+            try {
+                if(jsonObject.getInt("status") == 0){
+                    Toast.makeText(getApplicationContext(), "Login / Pass incorrect !!!", Toast.LENGTH_LONG).show();
+                }else{
+
+                    // si Admin
+                    if(jsonObject.getInt("status") == 1 || jsonObject.getInt("status") == 2 || jsonObject.getInt("status") == 4){
+                        Session.setConnecter(true);
+
+                        String nom = jsonObject.getString("nom");
+                        String prenom = jsonObject.getString("prenom");
+                        String sexe = jsonObject.getString("sexe");
+                        String role = jsonObject.getString("role");
+
+                        Session.setAuth_id(jsonObject.getInt("id"));
+                        Session.setIdActivite(jsonObject.getInt("idActivity"));
+                        Session.setAuth_name(nom+" "+prenom);
+                        Session.setAuth_role(role);
+
+                        if(sexe=="M") Toast.makeText(getApplicationContext(), "Bienvenu M. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
+                        if(sexe=="F") Toast.makeText(getApplicationContext(), "Bienvenu Mme. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
+
+                        Toast.makeText(getApplicationContext(), "connecter", Toast.LENGTH_LONG).show();
+                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(i);
+                     }
+                    // si Etudiant
+                    else if(jsonObject.getInt("status") == 3){
+                        Toast.makeText(getApplicationContext(), "Attention !!! acces limité pour les étudiants", Toast.LENGTH_LONG).show();
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                        mEmailView.requestFocus();
+                     }
+                    // si visiteur
+                    else if(jsonObject.getInt("status") == 5){
+                        Toast.makeText(getApplicationContext(), "votre compte n'est pas activivé bien vouloir contacter l'administrateur", Toast.LENGTH_LONG).show();
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                        mEmailView.requestFocus();
+                    }
+                }
+            } catch (JSONException e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            /*if (success) {
                 //finish();
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(i);
@@ -451,7 +423,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
                 mEmailView.requestFocus();
-            }
+            }*/
         }
 
         @Override

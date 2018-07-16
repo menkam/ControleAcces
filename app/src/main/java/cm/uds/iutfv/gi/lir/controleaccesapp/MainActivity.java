@@ -26,6 +26,7 @@ import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantEnSalleFra
 import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantTerminerFragment;
 import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantTricheurFragment;
 import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerListeEtudiantFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.Scanner;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
 
@@ -132,10 +133,11 @@ public class MainActivity extends AppCompatActivity  {
                     switch (position) {
                         case 0:
                             //recyclerEtudiantEnSalleFragment.showToast(getApplicationContext(), "en salle");
-                            recyclerEtudiantEnSalleFragment.refreshList(getApplicationContext());
+                            recyclerEtudiantEnSalleFragment.refreshList();
                             image = getDrawable(R.drawable.img_en_salle);
                             color = getResources().getColor(R.color.purple);
                             newDrawable = getResources().getDrawable(R.drawable.ticket);
+                            Session.setNumTab(0);
                             fab.setImageResource(R.color.colorPrimary);
                             fab.setImageResource(R.drawable.ic_add_user);
                             fab.setVisibility(View.VISIBLE);
@@ -145,6 +147,7 @@ public class MainActivity extends AppCompatActivity  {
                             image = getDrawable(R.drawable.img_terminer);
                             color = getResources().getColor(R.color.green);
                             newDrawable = getResources().getDrawable(R.drawable.tennis);
+                            Session.setNumTab(1);
                             fab.setBackgroundColor(R.color.green);
                             fab.setImageResource(R.drawable.ic_user_finish);
                             fab.setVisibility(View.VISIBLE);
@@ -154,6 +157,7 @@ public class MainActivity extends AppCompatActivity  {
                             image = getDrawable(R.drawable.img_tricheur);
                             color = getResources().getColor(R.color.orange);
                             newDrawable = getResources().getDrawable(R.drawable.light);
+                            Session.setNumTab(2);
                             fab.setBackgroundResource(R.color.colorBtnRemove);
                             fab.setImageResource(R.drawable.ic_remove_user);
                             fab.setVisibility(View.VISIBLE);
@@ -163,6 +167,7 @@ public class MainActivity extends AppCompatActivity  {
                             image = getDrawable(R.drawable.img_liste);
                             color = getResources().getColor(R.color.cyan);
                             newDrawable = getResources().getDrawable(R.drawable.earth);
+                            Session.setNumTab(3);
                             fab.setVisibility(View.INVISIBLE);
                             break;
                     }
@@ -170,7 +175,9 @@ public class MainActivity extends AppCompatActivity  {
                     fab.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            scanCode();
+                            Intent scaner = new Intent(MainActivity.this, Scanner.class);
+                            startActivity(scaner);
+                            //scanCode();
                             //setTabEnCours(tab.getPosition());
                         }
                     });
@@ -237,13 +244,14 @@ public class MainActivity extends AppCompatActivity  {
         animatorSetDisappear.start();
     }
 
-    private void scanCode() {
+   /* private void scanCode() {
+
         //scan
         IntentIntegrator scanIntegrator = new IntentIntegrator(this);
         scanIntegrator.initiateScan();
-    }
+    }*/
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    /*public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         //retrieve scan result
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanningResult != null) {
@@ -259,7 +267,7 @@ public class MainActivity extends AppCompatActivity  {
             else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
         }
         else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
-    }
+    }*/
 
     /*
     @Override
