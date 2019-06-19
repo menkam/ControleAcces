@@ -1,4 +1,4 @@
-package cm.uds.iutfv.gi.lir.controleacces;
+package cm.uds.iutfv.gi.lir.controleaccesapp;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,7 +8,7 @@ import android.widget.ProgressBar;
 
 import cm.uds.iutfv.gi.lir.blundell.tut.task.LoadingTask;
 import cm.uds.iutfv.gi.lir.blundell.tut.task.LoadingTask.LoadingTaskFinishedListener;
-import cm.uds.iutfv.gi.lir.controleacces.auth.LoginActivity;
+import cm.uds.iutfv.gi.lir.controleaccesapp.auth.LoginActivity;
 
 public class SplashActivity extends Activity implements LoadingTaskFinishedListener {
 
@@ -23,7 +23,7 @@ public class SplashActivity extends Activity implements LoadingTaskFinishedListe
 
 
         // Show the splash screen
-        setContentView(R.layout.activity_splash);
+        setContentView(R.layout.splash_activity);
         // Find the progress bar
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.activity_splash_progress_bar);
         // Start your loading

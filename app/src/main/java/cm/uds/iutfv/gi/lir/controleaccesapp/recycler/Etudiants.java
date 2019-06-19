@@ -1,12 +1,10 @@
-package cm.uds.iutfv.gi.lir.controleacces.recycler;
+package cm.uds.iutfv.gi.lir.controleaccesapp.recycler;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 
-/**
- * Created by men_franc 18-05-2018
- */
-
-public class Etudiants {
+public class Etudiants extends Activity {
 
     private String name;
     private String description;
@@ -56,5 +54,10 @@ public class Etudiants {
 
     public void setAvatar(Bitmap avatar) {
         this.avatar = avatar;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 }

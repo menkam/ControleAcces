@@ -45,7 +45,7 @@
     <string name="message2">DEJA IDENTIFIER</string>
     <string name="message3">ACCES AUTORISE</string>
     <string name="lib_nbreEtud">Etudiants Présents : </string>
-    <string name="contenuVide"></string>
+    <string name="contenuVide"> </string>
     <string name="matricule">Matricule :</string>
     <string name="nom">Nom :</string>
     <string name="prenom">Prénom :</string>

@@ -1,4 +1,4 @@
-package cm.uds.iutfv.gi.lir.controleacces.recycler;
+package cm.uds.iutfv.gi.lir.controleaccesapp.recycler;
 
 import android.view.View;
 

@@ -1,4 +1,4 @@
-package cm.uds.iutfv.gi.lir.controleacces.fragments.dummy;
+package cm.uds.iutfv.gi.lir.controleaccesapp.fragments.dummy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class DummyContent {
      */
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
 
-    private static final int COUNT = 25;
+    public static final int COUNT = 25;
 
     static {
         // Add some sample items.
@@ -32,16 +32,16 @@ public class DummyContent {
         }
     }
 
-    private static void addItem(DummyItem item) {
+    public static void addItem(DummyItem item) {
         ITEMS.add(item);
         ITEM_MAP.put(item.id, item);
     }
 
-    private static DummyItem createDummyItem(int position) {
+    public static DummyItem createDummyItem(int position) {
         return new DummyItem(String.valueOf(position), "Item " + position, makeDetails(position));
     }
 
-    private static String makeDetails(int position) {
+    public static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
         builder.append("Details about Item: ").append(position);
         for (int i = 0; i < position; i++) {

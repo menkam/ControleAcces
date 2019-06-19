@@ -1,12 +1,14 @@
-package cm.uds.iutfv.gi.lir.controleacces.auth;
+package cm.uds.iutfv.gi.lir.controleaccesapp.auth;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Looper;
 import android.support.annotation.NonNull;
-
-import android.app.Activity;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
 import android.content.CursorLoader;
@@ -28,18 +30,34 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import cm.uds.iutfv.gi.lir.controleacces.R;
+import cm.uds.iutfv.gi.lir.controleaccesapp.MainActivity;
+import cm.uds.iutfv.gi.lir.controleaccesapp.R;
+import cm.uds.iutfv.gi.lir.controleaccesapp.Session;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -67,7 +85,7 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login2);
+        setContentView(R.layout.login_activity);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -112,9 +130,14 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            // TODO: alert the user with a Snackbar/AlertDialog giving them the permission rationale
-            // To use the Snackbar from the design support library, ensure that the activity extends
-            // AppCompatActivity and uses the Theme.AppCompat theme.
+            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(android.R.string.ok, new View.OnClickListener() {
+                        @Override
+                        @TargetApi(Build.VERSION_CODES.M)
+                        public void onClick(View v) {
+                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                        }
+                    });
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
@@ -156,21 +179,27 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        // Check for a valid password and email, if the user entered one.
+
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            if (TextUtils.isEmpty(email)){
+                mEmailView.setError(getString(R.string.error_field_required));
+                focusView = mEmailView;
+            }
+            else {
+                mPasswordView.setError(getString(R.string.error_field_required));
+                focusView = mPasswordView;
+            }
             cancel = true;
         }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        else if (!isEmailValid(email) || !isPasswordValid(password)){
+            if (!isEmailValid(email)) {
+                mEmailView.setError(getString(R.string.error_invalid_email));
+                focusView = mEmailView;
+            }else{
+                mPasswordView.setError(getString(R.string.error_invalid_password));
+                focusView = mPasswordView;
+            }
             cancel = true;
         }
 
@@ -189,13 +218,21 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return (email.contains("@yahoo.fr") ||
+            email.contains("@yahoo.com") ||
+            email.contains("@yahoo.cm") ||
+            email.contains("@uds.cm") ||
+            email.contains("@gmail.com") ||
+            email.contains("@hotmail.fr")
+        );
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 5;
     }
+
+
 
     /**
      * Shows the progress UI and hides the login form.
@@ -270,7 +307,7 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity2.this,
+                new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -291,50 +328,102 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String mEmail;
         private final String mPassword;
+        private boolean connecter;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
-
+        ///String url = Session.getRoute_login() +"email="+mEmail+"&password="+mPassword;********
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
+        protected JSONObject doInBackground(Void... params) {
+            JSONObject jsonObject = null;
+            String url = Session.getRoute_login() +"email="+mEmail+"&password="+mPassword;
+            StringBuffer reponseHTTP = new StringBuffer();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(url);
+            HttpResponse response = null;
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
+                response = client.execute(httpGet);
+                StatusLine statusLine = response.getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if(statusCode == 200) {
+                    HttpEntity entity = response.getEntity();
+                    InputStream content = entity.getContent();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                    String line;
+                    while ((line = reader.readLine()) != null) { reponseHTTP.append(line); }
+                    jsonObject = new JSONObject(reponseHTTP.toString());
+                }else{ Toast.makeText(getApplicationContext(), "Code = "+statusCode, Toast.LENGTH_LONG).show(); }
+            } catch (IOException e) { Toast.makeText(getApplicationContext(), "erreur de ccreation du clientHttp : "+e.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (JSONException e) { Toast.makeText(getApplicationContext(), "erreur de conversion JSON : "+e.getMessage(), Toast.LENGTH_LONG).show();}
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
+            return jsonObject;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(JSONObject jsonObject) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                finish();
+            try {
+                if(jsonObject.getInt("status") == 0){
+                    Toast.makeText(getApplicationContext(), "Login / Pass incorrect !!!", Toast.LENGTH_LONG).show();
+                }else{
+
+                    // si Admin
+                    if(jsonObject.getInt("status") == 1 || jsonObject.getInt("status") == 2 || jsonObject.getInt("status") == 4){
+                        Session.setConnecter(true);
+
+                        String nom = jsonObject.getString("nom");
+                        String prenom = jsonObject.getString("prenom");
+                        String sexe = jsonObject.getString("sexe");
+                        String role = jsonObject.getString("role");
+
+                        Session.setAuth_id(jsonObject.getInt("id"));
+                        Session.setIdActivite(jsonObject.getInt("idActivity"));
+                        Session.setAuth_name(nom+" "+prenom);
+                        Session.setAuth_role(role);
+
+                        if(sexe=="M") Toast.makeText(getApplicationContext(), "Bienvenu M. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
+                        if(sexe=="F") Toast.makeText(getApplicationContext(), "Bienvenu Mme. "+nom+" "+prenom, Toast.LENGTH_LONG).show();
+
+                        Toast.makeText(getApplicationContext(), "connecter", Toast.LENGTH_LONG).show();
+                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(i);
+                     }
+                    // si Etudiant
+                    else if(jsonObject.getInt("status") == 3){
+                        Toast.makeText(getApplicationContext(), "Attention !!! acces limité pour les étudiants", Toast.LENGTH_LONG).show();
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                        mEmailView.requestFocus();
+                     }
+                    // si visiteur
+                    else if(jsonObject.getInt("status") == 5){
+                        Toast.makeText(getApplicationContext(), "votre compte n'est pas activivé bien vouloir contacter l'administrateur", Toast.LENGTH_LONG).show();
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                        mEmailView.requestFocus();
+                    }
+                }
+            } catch (JSONException e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            /*if (success) {
+                //finish();
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(i);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
-            }
+                mEmailView.requestFocus();
+            }*/
         }
 
         @Override
@@ -343,5 +432,5 @@ public class LoginActivity2 extends Activity implements LoaderCallbacks<Cursor> 
             showProgress(false);
         }
     }
-}
 
+}

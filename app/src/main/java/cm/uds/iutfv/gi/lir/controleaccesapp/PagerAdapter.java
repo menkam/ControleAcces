@@ -1,4 +1,4 @@
-package cm.uds.iutfv.gi.lir.controleacces;
+package cm.uds.iutfv.gi.lir.controleaccesapp;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import cm.uds.iutfv.gi.lir.controleacces.recycler.Etudiants;
-import cm.uds.iutfv.gi.lir.controleacces.recycler.ItemClickListener;
-import cm.uds.iutfv.gi.lir.controleacces.recycler.MyViewHolder;
+import cm.uds.iutfv.gi.lir.controleaccesapp.recycler.Etudiants;
+import cm.uds.iutfv.gi.lir.controleaccesapp.recycler.ItemClickListener;
+import cm.uds.iutfv.gi.lir.controleaccesapp.recycler.MyViewHolder;
 
 /**
  * Created by florentchampigny on 24/04/15.

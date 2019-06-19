@@ -1,4 +1,4 @@
-package cm.uds.iutfv.gi.lir.controleacces.fragments;
+package cm.uds.iutfv.gi.lir.controleaccesapp.fragments;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
@@ -32,27 +32,27 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import cm.uds.iutfv.gi.lir.controleacces.PagerAdapter;
-import cm.uds.iutfv.gi.lir.controleacces.R;
-import cm.uds.iutfv.gi.lir.controleacces.Session;
-import cm.uds.iutfv.gi.lir.controleacces.recycler.Etudiants;
+import cm.uds.iutfv.gi.lir.controleaccesapp.PagerAdapter;
+import cm.uds.iutfv.gi.lir.controleaccesapp.R;
+import cm.uds.iutfv.gi.lir.controleaccesapp.Session;
+import cm.uds.iutfv.gi.lir.controleaccesapp.recycler.Etudiants;
 
 /**
  * Created by florentchampigny on 24/04/15.
  */
 @SuppressLint("ValidFragment")
-public class RecyclerEtudiantTricheurFragment extends Fragment {
+public class RecyclerViewFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private int tab = -1;
 
-    public RecyclerEtudiantTricheurFragment(int tab) {
+    public RecyclerViewFragment(int tab) {
         this.tab = tab;
     }
 
-    public static RecyclerEtudiantTricheurFragment newInstance(int tab) {
-        return new RecyclerEtudiantTricheurFragment(tab);
+    public static RecyclerViewFragment newInstance(int tab) {
+        return new RecyclerViewFragment(tab);
     }
 
 
@@ -72,10 +72,32 @@ public class RecyclerEtudiantTricheurFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
 
         //penser à passer notre Adapter (ici : TestRecyclerViewAdapter) à un RecyclerViewMaterialAdapter
-        mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
-        mRecyclerView.setAdapter(mAdapter);
-        //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
-        MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+        switch (this.tab){
+            case 0:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+            case 1:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+            case 2:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+            case 3:
+                mAdapter = new RecyclerViewMaterialAdapter(new PagerAdapter(getList(3)));
+                mRecyclerView.setAdapter(mAdapter);
+                //notifier le MaterialViewPager qu'on va utiliser une RecyclerView
+                MaterialViewPagerHelper.registerRecyclerView(getActivity(), mRecyclerView, null);
+                break;
+        }
 
     }
 
@@ -98,10 +120,8 @@ public class RecyclerEtudiantTricheurFragment extends Fragment {
 
                     StringBuffer reponseHTTP = new StringBuffer();
                     HttpClient client = new DefaultHttpClient();
-                    String url = Session.getRoute_get_etutEnSalle(2);
-                    HttpGet httpGet = new HttpGet(
-                            "http://controle-acces-iutfv.herokuapp.com/androidGetListEtudiant?idActivite=1&statut=2"
-                    );
+                    String url = Session.getRoute_get_listeEtud();
+                    HttpGet httpGet = new HttpGet(url);
                     try{
                         HttpResponse response = client.execute(httpGet);
                         StatusLine statusLine = response.getStatusLine();
@@ -135,9 +155,46 @@ public class RecyclerEtudiantTricheurFragment extends Fragment {
                                     etudiant.setAvatar(bm);
                                     etudiant.setRegime(obj.getString("regime"));
 
-                                    // On ajoute la personne à la liste
-                                    Session.movies3.add(etudiant);
+                                    //etudiants.add(etudiant);
+                                    switch (Session.getTabEnCours()){
+                                        case 0:
+                                            Session.movies1.add(etudiant);
+                                            break;
+                                        case 1:
+                                            Session.movies2.add(etudiant);
+                                            break;
+                                        case 2:
+                                            Session.movies3.add(etudiant);
+                                            break;
+                                        case 3:
+                                            Session.movies4.add(etudiant);
+                                            break;
+                                    }
                                 }
+                                //ArrayList<Etudiants> mContentItems = new ArrayList<>();
+                                /*for (int i = 0; i < 100; ++i){
+                                    Etudiants etudiant = new Etudiants();
+                                    etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
+                                    if((i+1)%3==1) etudiant.setDescription("Regulier");
+                                    else etudiant.setDescription("Creditaire");
+                                    //etudiants.add(etudiant);
+                                    switch (Session.getTabEnCours()){
+                                        case 0:
+                                            Session.movies1.add(etudiant);
+                                            break;
+                                        case 1:
+                                            Session.movies2.add(etudiant);
+                                            break;
+                                        case 2:
+                                            Session.movies3.add(etudiant);
+                                            break;
+                                        case 3:
+                                            Session.movies4.add(etudiant);
+                                            break;
+                                    }
+                                }*/
+                            // On ajoute la personne à la liste
+
 
                             Toast.makeText(getContext(), "Nombre d'etudiant"+array.length(), Toast.LENGTH_LONG).show();
                         }else{
@@ -158,6 +215,38 @@ public class RecyclerEtudiantTricheurFragment extends Fragment {
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
-        return Session.movies3;
+        //return Session.movies4;
+        //return personnes;
+        /*ArrayList<Etudiants> mContentItems = new ArrayList<>();
+        for (int i = 0; i < 100; ++i){
+            Etudiants etudiant = new Etudiants();
+            etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
+            if((i+1)%3==1) etudiant.setDescription("Regulier");
+            else etudiant.setDescription("Creditaire");
+            //mContentItems.add(etudiant);
+
+        }*/
+        switch (Session.getTabEnCours()){
+            case 0:
+                return Session.movies1;
+            case 1:
+                return Session.movies2;
+            case 2:
+                return Session.movies3;
+            case 3:
+                return Session.movies4;
+            default:
+                return null;
+        }
+       /* ArrayList<Etudiants> mContentItems = new ArrayList<>();
+        for (int i = 0; i < 100; ++i){
+            Etudiants etudiant = new Etudiants();
+            etudiant.setName("Matricule"+i+" NOM"+i+" Prenom"+i);
+            if((i+1)%3==1) etudiant.setDescription("Regulier");
+            else etudiant.setDescription("Creditaire");
+            mContentItems.add(etudiant);
+        }
+
+        return mContentItems;*/
     }
 }

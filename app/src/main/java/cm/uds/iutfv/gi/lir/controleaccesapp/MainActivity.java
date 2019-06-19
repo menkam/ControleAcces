@@ -1,4 +1,4 @@
-package cm.uds.iutfv.gi.lir.controleacces;
+package cm.uds.iutfv.gi.lir.controleaccesapp;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +22,16 @@ import android.widget.Toast;
 
 import com.github.florent37.materialviewpager.MaterialViewPager;
 
-import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerEtudiantEnSalleFragment;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerEtudiantTerminerFragment;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerEtudiantTricheurFragment;
-import cm.uds.iutfv.gi.lir.controleacces.fragments.RecyclerListeEtudiantFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantEnSalleFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantTerminerFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerEtudiantTricheurFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.RecyclerListeEtudiantFragment;
+import cm.uds.iutfv.gi.lir.controleaccesapp.fragments.Scanner;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentIntegrator;
 import cm.uds.iutfv.gi.lir.zxing.integration.android.IntentResult;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
     MaterialViewPager materialViewPager;
     View headerLogo;
@@ -39,12 +39,16 @@ public class MainActivity extends AppCompatActivity {
     public TextView auth_role;
     public TextView auth_name;
     public ImageView auth_photo;
+
     private RecyclerEtudiantEnSalleFragment recyclerEtudiantEnSalleFragment;
+    private RecyclerEtudiantTerminerFragment recyclerEtudiantTerminerFragment;
+    private RecyclerEtudiantTricheurFragment recyclerEtudiantTricheurFragment ;
+    private RecyclerListeEtudiantFragment recyclerListeEtudiantFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main0);
+        setContentView(R.layout.activity_main);
 
         auth_role = (TextView) findViewById(R.id.auth_role);
         auth_name = (TextView) findViewById(R.id.auth_name);
@@ -75,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             public Fragment getItem(int position) {
                 switch (position) {
                     case 0:
-                        return recyclerEtudiantEnSalleFragment;
+                        return RecyclerEtudiantEnSalleFragment.newInstance(position);
                     case 1:
                         return RecyclerEtudiantTerminerFragment.newInstance(position);
                     case 2:
@@ -121,41 +125,49 @@ public class MainActivity extends AppCompatActivity {
                 if (oldItemPosition != position) {
                     oldItemPosition = position;
 
-                    //définir la nouvelle couleur et les nouvelles images
+                    //définir la nouvelle couleur et la nouvelle images
                     Drawable image = null;
                     int color = Color.BLACK;
                     Drawable newDrawable = null;
 
                     switch (position) {
                         case 0:
+                            //recyclerEtudiantEnSalleFragment.showToast(getApplicationContext(), "en salle");
+                            recyclerEtudiantEnSalleFragment.refreshList();
                             image = getDrawable(R.drawable.img_en_salle);
                             color = getResources().getColor(R.color.purple);
                             newDrawable = getResources().getDrawable(R.drawable.ticket);
+                            Session.setNumTab(0);
                             fab.setImageResource(R.color.colorPrimary);
                             fab.setImageResource(R.drawable.ic_add_user);
                             fab.setVisibility(View.VISIBLE);
-
                             break;
                         case 1:
+                            recyclerEtudiantTerminerFragment.refreshList(getApplicationContext());
                             image = getDrawable(R.drawable.img_terminer);
                             color = getResources().getColor(R.color.green);
                             newDrawable = getResources().getDrawable(R.drawable.tennis);
+                            Session.setNumTab(1);
                             fab.setBackgroundColor(R.color.green);
                             fab.setImageResource(R.drawable.ic_user_finish);
                             fab.setVisibility(View.VISIBLE);
                             break;
                         case 2:
+                            recyclerEtudiantTricheurFragment.refreshList(getApplicationContext());
                             image = getDrawable(R.drawable.img_tricheur);
                             color = getResources().getColor(R.color.orange);
                             newDrawable = getResources().getDrawable(R.drawable.light);
+                            Session.setNumTab(2);
                             fab.setBackgroundResource(R.color.colorBtnRemove);
                             fab.setImageResource(R.drawable.ic_remove_user);
                             fab.setVisibility(View.VISIBLE);
                             break;
                         case 3:
+                            recyclerListeEtudiantFragment.refreshList(getApplicationContext());
                             image = getDrawable(R.drawable.img_liste);
                             color = getResources().getColor(R.color.cyan);
                             newDrawable = getResources().getDrawable(R.drawable.earth);
+                            Session.setNumTab(3);
                             fab.setVisibility(View.INVISIBLE);
                             break;
                     }
@@ -163,7 +175,9 @@ public class MainActivity extends AppCompatActivity {
                     fab.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            scanCode();
+                            Intent scaner = new Intent(MainActivity.this, Scanner.class);
+                            startActivity(scaner);
+                            //scanCode();
                             //setTabEnCours(tab.getPosition());
                         }
                     });
@@ -183,25 +197,6 @@ public class MainActivity extends AppCompatActivity {
         this.materialViewPager.getViewPager().setOffscreenPageLimit(tabCount);
         //relie les tabs au viewpager
         this.materialViewPager.getPagerTitleStrip().setViewPager(this.materialViewPager.getViewPager());
-        this.materialViewPager.getViewPager().setOnPageChangeListener(
-                new ViewPager.OnPageChangeListener() {
-                    @Override
-                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                    }
-
-                    @Override
-                    public void onPageSelected(int position) {
-                        if(position == 0)
-                        recyclerEtudiantEnSalleFragment.showToast("hello world");
-                    }
-
-                    @Override
-                    public void onPageScrollStateChanged(int state) {
-
-                    }
-                }
-        );
     }
 
     /**
@@ -249,15 +244,14 @@ public class MainActivity extends AppCompatActivity {
         animatorSetDisappear.start();
     }
 
-    private void scanCode() {
+   /* private void scanCode() {
+
         //scan
         IntentIntegrator scanIntegrator = new IntentIntegrator(this);
         scanIntegrator.initiateScan();
-    }
+    }*/
 
-
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    /*public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         //retrieve scan result
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanningResult != null) {
@@ -273,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
             else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
         }
         else Toast.makeText(getApplicationContext(), "No scan data received!", Toast.LENGTH_SHORT).show();
-    }
+    }*/
 
     /*
     @Override
